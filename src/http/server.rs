@@ -1465,7 +1465,10 @@ pub mod ws {
                 httpd_ws_type_t_HTTPD_WS_TYPE_PING => (FrameType::Ping, 0),
                 httpd_ws_type_t_HTTPD_WS_TYPE_PONG => (FrameType::Pong, 0),
                 httpd_ws_type_t_HTTPD_WS_TYPE_CLOSE => (FrameType::Close, 0),
-                _ => panic!("Unknown frame type: {}", raw_frame.type_),
+                // TELOSNEX PATCH: a reserved opcode comes from the peer, so it
+                // must not panic (any LAN device could reboot the Widget before
+                // pairing). Report a close; the handler drops the connection.
+                _ => (FrameType::Close, 0),
             }
         }
     }
