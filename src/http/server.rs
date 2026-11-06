@@ -119,6 +119,9 @@ pub struct Configuration {
     pub uri_match_wildcard: bool,
     pub keep_alive: Option<KeepAlive>,
     pub so_linger: Option<Duration>,
+    /// Called by httpd for each accepted socket, before it reads the
+    /// request. Returning an error closes the socket.
+    pub open_fn: httpd_open_func_t,
     #[cfg(esp_idf_esp_https_server_enable)]
     pub server_certificate: Option<X509<'static>>,
     #[cfg(esp_idf_esp_https_server_enable)]
@@ -146,6 +149,7 @@ impl Default for Configuration {
             uri_match_wildcard: false,
             keep_alive: None,
             so_linger: None,
+            open_fn: None,
             #[cfg(esp_idf_esp_https_server_enable)]
             server_certificate: None,
             #[cfg(esp_idf_esp_https_server_enable)]
@@ -187,7 +191,7 @@ impl From<&Configuration> for Newtype<httpd_config_t> {
             global_user_ctx_free_fn: None,
             global_transport_ctx: ptr::null_mut(),
             global_transport_ctx_free_fn: None,
-            open_fn: None,
+            open_fn: conf.open_fn,
             close_fn: None,
             uri_match_fn: conf.uri_match_wildcard.then_some(httpd_uri_match_wildcard),
             keep_alive_enable: conf.keep_alive.is_some(),
