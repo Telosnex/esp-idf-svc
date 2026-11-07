@@ -626,6 +626,13 @@ impl<'d> WifiDriver<'d> {
                 ),
             ))]
             dump_hesigb_enable: WIFI_DUMP_HESIGB_ENABLED != 0,
+            // Added in ESP IDF V5.5.6. Zero makes esp_wifi_init fail to
+            // create the Wi-Fi task.
+            #[cfg(any(
+                esp_idf_version_patch_at_least_5_5_6,
+                esp_idf_version_at_least_5_6_0,
+            ))]
+            wifi_task_stack_size: WIFI_TASK_STACK_SIZE as _,
             ..Default::default()
         };
         esp!(unsafe { esp_wifi_init(&cfg) })?;
